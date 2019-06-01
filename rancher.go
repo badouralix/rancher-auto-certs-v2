@@ -10,6 +10,7 @@ import (
 
 // Manager for Rancher certificates
 type certificateManager struct {
+	cache  map[string]*rancher.Certificate
 	client rancher.CertificateOperations
 }
 
@@ -36,23 +37,28 @@ func newCertificateManagerFromEnvvar() (*certificateManager, error) {
 
 	// Build the certificate manager
 	return &certificateManager{
+		cache:  make(map[string]*rancher.Certificate),
 		client: rancherClient.Certificate,
 	}, nil
 }
 
-func (cm *certificateManager) listRancherCerts() (map[string]*rancher.Certificate, error) {
+func (cm *certificateManager) clearLocalCertCache() {
+	// Old cache will be garbage collected
+	cm.cache = make(map[string]*rancher.Certificate)
+}
+
+func (cm *certificateManager) updateLocalCertCache() error {
+	// TODO: iterate with Next
 	certificateCollection, err := cm.client.List(&rancher.ListOpts{})
 	if err != nil {
-		return nil, fmt.Errorf("rancher: %v", err)
+		return fmt.Errorf("rancher: %v", err)
 	}
-
-	mapping := map[string]*rancher.Certificate{}
 
 	for _, certificate := range certificateCollection.Data {
-		mapping[certificate.Name] = &certificate
+		cm.cache[certificate.Name] = &certificate
 	}
 
-	return mapping, nil
+	return nil
 }
 
 func (cm *certificateManager) updateRancherCert(existing *rancher.Certificate, updates interface{}) (*rancher.Certificate, error) {
