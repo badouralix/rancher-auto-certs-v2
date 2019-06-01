@@ -21,7 +21,7 @@ func main() {
 	}
 
 	// Run repetitively
-	ticker := time.NewTicker(24 * time.Second)
+	ticker := time.NewTicker(24 * time.Hour)
 
 	// See https://stackoverflow.com/questions/32705582/how-to-get-time-tick-to-tick-immediately
 	for ; true; <-ticker.C {
