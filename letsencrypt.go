@@ -3,11 +3,13 @@ package main
 import (
 	"crypto"
 	"fmt"
+	"os"
+	"sync"
 
 	"github.com/go-acme/lego/certcrypto"
 	"github.com/go-acme/lego/certificate"
-	"github.com/go-acme/lego/challenge"
 	"github.com/go-acme/lego/lego"
+	"github.com/go-acme/lego/log"
 	"github.com/go-acme/lego/providers/dns"
 	"github.com/go-acme/lego/registration"
 )
@@ -31,45 +33,21 @@ func (u *letsencryptUser) GetPrivateKey() crypto.PrivateKey {
 
 // We use a manager to cache letsencrypt clients and their users
 type letsencryptManager struct {
-	clients map[accountConfig]*lego.Client
+	clients     map[string]*lego.Client
+	environment sync.Mutex
 }
 
 func newLEManager() (*letsencryptManager, error) {
 	return &letsencryptManager{
-		clients: make(map[accountConfig]*lego.Client),
+		clients: make(map[string]*lego.Client),
 	}, nil
 }
 
 func (lm *letsencryptManager) GenCertificate(cc *certConfig) (*certificate.Resource, error) {
-	// Dispatch supported challenges to dedicated methods
-	if cc.Challenge == "dns-01" {
-		return lm.GenCertificateWithDNS01(cc)
-	}
-
-	// Return an error if no dispatch occurred
-	return nil, fmt.Errorf("letsencrypt: challenge %s is not supported", cc.Challenge)
-}
-
-func (lm *letsencryptManager) GenCertificateWithDNS01(cc *certConfig) (*certificate.Resource, error) {
 	client, err := lm.GetClient(cc)
 	if err != nil {
 		return nil, err
 	}
-
-	provider, err := dns.NewDNSChallengeProviderByName(cc.Provider)
-	if err != nil {
-		return nil, err
-	}
-
-	err = client.Challenge.SetDNS01Provider(provider)
-	if err != nil {
-		return nil, err
-	}
-	// As the client is cached, we need to clean it before reusing it
-	// This specific challenge may fail for another certificate, and keeping it is an antipattern
-	// See https://github.com/go-acme/lego/issues/842
-	// TODO: maybe only cache the user instead of the client ( note that the user registration depends on the client )
-	defer client.Challenge.Remove(challenge.DNS01)
 
 	request := certificate.ObtainRequest{
 		Domains: cc.Domains,
@@ -87,15 +65,14 @@ func (lm *letsencryptManager) GenCertificateWithDNS01(cc *certConfig) (*certific
 }
 
 func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
-	ac := cc.getAccountConfig()
-
-	if client, ok := lm.clients[ac]; ok {
+	// Try to retrieve client from cache
+	if client, ok := lm.clients[cc.Name]; ok {
 		return client, nil
 	}
 
-	// If not ok, no client has been generated for this specific accountConfig yet
+	// If not ok, no client has been generated for this cert yet
 
-	// Create a user. New accounts need an email and private key to start.
+	// Create user: new accounts need an email and private key to start
 	privateKey, err := cc.getPrivateKey()
 	if err != nil {
 		return nil, err
@@ -106,9 +83,10 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 		key:   privateKey,
 	}
 
+	// Create config for user
 	config := lego.NewConfig(&user)
 
-	// This CA URL is configured for a local dev instance of Boulder running in Docker in a VM.
+	// The CA URL can be overridden for development purpose
 	config.CADirURL = cc.CA
 
 	// The default key type is RSA2048, but we provide the ability to override it
@@ -133,15 +111,49 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 		return nil, fmt.Errorf("letsencrypt: %v", err)
 	}
 
-	// Client is cached
-	lm.clients[ac] = client
-
 	// New users will need to register
 	reg, err := client.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
 	if err != nil {
 		return nil, err
 	}
 	user.Registration = reg
+
+	// Register challenges
+
+	// Lock mutex as we are going to update the environment
+	lm.environment.Lock()
+	defer lm.environment.Unlock()
+
+	// Dispatch supported challenges to dedicated methods
+	if cc.Challenge == "dns-01" {
+		// Yolo patch the environment with config credentials
+		for envvar, value := range cc.Env {
+			err := os.Setenv(envvar, value)
+			defer os.Unsetenv(envvar)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		// Build provider
+		provider, err := dns.NewDNSChallengeProviderByName(cc.Provider)
+		if err != nil {
+			return nil, err
+		}
+
+		// Register provider
+		err = client.Challenge.SetDNS01Provider(provider)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Return an error if no dispatch occurred
+		return nil, fmt.Errorf("letsencrypt: challenge %s is not supported", cc.Challenge)
+	}
+
+	// Client is cached
+	log.Infof("letsencrypt: A new client has been created for %s", cc.Name)
+	lm.clients[cc.Name] = client
 
 	// Client is returned
 	return client, nil

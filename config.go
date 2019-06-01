@@ -15,15 +15,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// accountConfig is used to cache letsencrypt clients and users
-// It is a subset of certConfig and we don't expect having many accountConfig
-type accountConfig struct {
-	CA      string
-	Email   string
-	Key     string
-	KeyType string
-}
-
 type certConfig struct {
 	AccountEmail       string `yaml:"account_email"`
 	AccountKey         string `yaml:"account_key"`
@@ -32,18 +23,10 @@ type certConfig struct {
 	CreateKeyIfMissing *bool `yaml:"create_key_if_missing"` // boolean pointer here to differentiate empty value from zero value
 	Description        string
 	Domains            []string
-	KeyType            string `yaml:"key_type"`
+	Env                map[string]string `json:",omitempty" yaml:",omitempty"`
+	KeyType            string            `yaml:"key_type"`
 	Name               string
 	Provider           string `json:",omitempty" yaml:",omitempty"`
-}
-
-func (cc certConfig) getAccountConfig() accountConfig {
-	return accountConfig{
-		CA:      cc.CA,
-		Email:   cc.AccountEmail,
-		Key:     cc.AccountKey,
-		KeyType: cc.KeyType,
-	}
 }
 
 // We guarantee that a certConfig has a private key

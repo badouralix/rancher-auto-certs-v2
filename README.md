@@ -4,6 +4,7 @@
 
 - [DNS Provider setup](#dns-provider-setup)
   - [OVH](#ovh)
+  - [Configuring multiple providers](#configuring-multiple-providers)
 - [Rancher setup](#rancher-setup)
 - [Configuration](#configuration)
 
@@ -32,6 +33,13 @@ Create keys in <https://eu.api.ovh.com/createToken/>
 More documentation on <https://github.com/ovh/go-ovh#use-the-api-for-a-single-user>
 
 Warning <https://community.ovh.com/t/createtoken-invalid-account-password/12454/2>
+
+### Configuring multiple providers
+
+Environment variables are meant to be environment variables. But if a provider
+must be instantiated multiple times ( for instance for domains registered on
+different accounts ), these environment variables can be defined in the config
+file. See [example](config/config-example.yml).
 
 ## Rancher setup
 
@@ -62,10 +70,11 @@ type certConfig struct {
 	AccountKey         string `yaml:"account_key"`
 	CA                 string
 	Challenge          string
-	CreateKeyIfMissing *bool `yaml:"create_key_if_missing"`
+	CreateKeyIfMissing *bool `yaml:"create_key_if_missing"` // boolean pointer here to differentiate empty value from zero value
 	Description        string
 	Domains            []string
-	KeyType            string `yaml:"key_type"`
+	Env                map[string]string `json:",omitempty" yaml:",omitempty"`
+	KeyType            string            `yaml:"key_type"`
 	Name               string
 	Provider           string `json:",omitempty" yaml:",omitempty"`
 }

@@ -18,5 +18,10 @@ certs:
     - "*.example.com"
   challenge: dns-01
   provider: ovh
+  env:
+    OVH_APPLICATION_KEY: XXXXX
+    OVH_APPLICATION_SECRET: XXXXX
+    OVH_CONSUMER_KEY: XXXXX
+    OVH_ENDPOINT: ovh-eu
   account_key: config/account-staging.key
   ca: https://acme-staging-v02.api.letsencrypt.org/directory
