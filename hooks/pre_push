@@ -8,7 +8,7 @@
 CUSTOM_TAG=${SOURCE_COMMIT:0:7}
 
 # Print custom envvars
-echo "Custom environments variables set by the pre_push hook:"
+echo "Custom environment variables set by the pre_push hook:"
 echo " - CUSTOM_TAG=$CUSTOM_TAG"
 
 # Tag the built image
