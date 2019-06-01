@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# This file  adds  a `pre_push` step  to  the automated build process.  For  further infomation,
+# see https://docs.docker.com/docker-cloud/builds/advanced/#override-build-test-or-push-commands
+#
+
+# Retrieve the short git revision hash
+CUSTOM_TAG=${SOURCE_COMMIT:0:7}
+
+# Print custom envvars
+echo "Custom environments variables set by the pre_push hook:"
+echo " - CUSTOM_TAG=$CUSTOM_TAG"
+
+# Tag the built image
+docker tag $IMAGE_NAME $DOCKER_REPO:$CUSTOM_TAG
+docker push $DOCKER_REPO:$CUSTOM_TAG
