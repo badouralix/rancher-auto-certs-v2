@@ -10,6 +10,8 @@ To create the go module, see [https://medium.com/mindorks/create-projects-indepe
 
 ```bash
 go mod init github.com/badouralix/rancher-auto-certs-v2
+# For some reasons, it does not pick github.com/go-acme/lego@v3.1.0 which fixes the issues below in https://github.com/go-acme/lego/pull/943
+go mod edit -require=github.com/go-acme/lego@v2.6.0
 ```
 
 `go-acme/lego` does not support go modules yet ( see [go-acme/lego/issues/827](https://github.com/go-acme/lego/issues/827) and [go-acme/lego/pull/706](https://github.com/go-acme/lego/pull/706) )
