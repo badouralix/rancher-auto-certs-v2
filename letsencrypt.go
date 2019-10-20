@@ -90,17 +90,18 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 	config.CADirURL = cc.CA
 
 	// The default key type is RSA2048, but we provide the ability to override it
-	if cc.KeyType == "EC256" {
+	switch cc.KeyType {
+	case "EC256":
 		config.Certificate.KeyType = certcrypto.EC256
-	} else if cc.KeyType == "EC384" {
+	case "EC384":
 		config.Certificate.KeyType = certcrypto.EC384
-	} else if cc.KeyType == "RSA2048" {
+	case "RSA2048":
 		config.Certificate.KeyType = certcrypto.RSA2048
-	} else if cc.KeyType == "RSA4096" {
+	case "RSA4096":
 		config.Certificate.KeyType = certcrypto.RSA4096
-	} else if cc.KeyType == "RSA8192" {
+	case "RSA8192":
 		config.Certificate.KeyType = certcrypto.RSA8192
-	} else {
+	default:
 		return nil, fmt.Errorf("letsencrypt: unsupported key type %s", cc.KeyType)
 	}
 
@@ -125,7 +126,8 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 	defer lm.environment.Unlock()
 
 	// Dispatch supported challenges to dedicated methods
-	if cc.Challenge == "dns-01" {
+	switch cc.Challenge {
+	case "dns-01":
 		// Yolo patch the environment with config credentials
 		for envvar, value := range cc.Env {
 			err := os.Setenv(envvar, value)
@@ -146,7 +148,7 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
+	default:
 		// Return an error if no dispatch occurred
 		return nil, fmt.Errorf("letsencrypt: challenge %s is not supported", cc.Challenge)
 	}
