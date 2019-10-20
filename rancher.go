@@ -54,8 +54,12 @@ func (cm *certificateManager) updateLocalCertCache() error {
 		return fmt.Errorf("rancher: %v", err)
 	}
 
-	for _, certificate := range certificateCollection.Data {
-		cm.cache[certificate.Name] = &certificate
+	for _, cert := range certificateCollection.Data {
+		// We need to make a local copy of the variable to be able to store the address of the certificate
+		// See https://stackoverflow.com/questions/48826460/using-pointers-in-a-for-loop-golang
+		certCopy := cert
+
+		cm.cache[certCopy.Name] = &certCopy
 	}
 
 	return nil
