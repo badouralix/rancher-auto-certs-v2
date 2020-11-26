@@ -1,10 +1,17 @@
 # `rancher-auto-certs-v2`
 
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/badouralix/rancher-auto-certs-v2?label=build&logo=docker&logoColor=white)](https://hub.docker.com/r/badouralix/rancher-auto-certs-v2)
+[![Docker Pulls](https://img.shields.io/docker/pulls/badouralix/rancher-auto-certs-v2?label=pulls&logo=docker&logoColor=white)](https://hub.docker.com/r/badouralix/rancher-auto-certs-v2)
+[![Docker Stars](https://img.shields.io/docker/stars/badouralix/rancher-auto-certs-v2?label=stars&logo=docker&logoColor=white)](https://hub.docker.com/r/badouralix/rancher-auto-certs-v2)
+[![Docker Image Version (latest by date)](https://img.shields.io/docker/v/badouralix/rancher-auto-certs-v2?logo=docker&logoColor=white)](https://hub.docker.com/r/badouralix/rancher-auto-certs-v2)
+[![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/badouralix/rancher-auto-certs-v2?label=size&logo=docker&logoColor=white)](https://hub.docker.com/r/badouralix/rancher-auto-certs-v2)
+[![MicroBadger Layers](https://img.shields.io/microbadger/layers/badouralix/rancher-auto-certs-v2?logo=docker&logoColor=white)](https://microbadger.com/images/badouralix/rancher-auto-certs-v2)
+
 <https://github.com/jonremy/rancher-auto-certs> with wildcard support
 
 - [DNS Provider setup](#dns-provider-setup)
-  - [OVH](#ovh)
-  - [Configuring multiple providers](#configuring-multiple-providers)
+	- [OVH](#ovh)
+	- [Configuring multiple providers](#configuring-multiple-providers)
 - [Rancher setup](#rancher-setup)
 - [Configuration](#configuration)
 
