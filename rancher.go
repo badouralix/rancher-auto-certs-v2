@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-acme/lego/platform/config/env"
+	"github.com/go-acme/lego/v4/platform/config/env"
 	rancher "github.com/rancher/go-rancher/client"
 )
 

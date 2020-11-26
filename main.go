@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/go-acme/lego/log"
+	"github.com/go-acme/lego/v4/log"
 	rancher "github.com/rancher/go-rancher/client"
 )
 

@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/go-acme/lego/log"
+	"github.com/go-acme/lego/v4/log"
 	"gopkg.in/yaml.v2"
 )
 

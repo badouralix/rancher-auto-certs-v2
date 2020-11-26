@@ -6,12 +6,12 @@ import (
 	"os"
 	"sync"
 
-	"github.com/go-acme/lego/certcrypto"
-	"github.com/go-acme/lego/certificate"
-	"github.com/go-acme/lego/lego"
-	"github.com/go-acme/lego/log"
-	"github.com/go-acme/lego/providers/dns"
-	"github.com/go-acme/lego/registration"
+	"github.com/go-acme/lego/v4/certcrypto"
+	"github.com/go-acme/lego/v4/certificate"
+	"github.com/go-acme/lego/v4/lego"
+	"github.com/go-acme/lego/v4/log"
+	"github.com/go-acme/lego/v4/providers/dns"
+	"github.com/go-acme/lego/v4/registration"
 )
 
 // We need a user or account type that implements registration.User
