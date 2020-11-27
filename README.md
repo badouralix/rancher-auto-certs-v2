@@ -12,6 +12,7 @@
 - [DNS Provider setup](#dns-provider-setup)
   - [OVH](#ovh)
   - [Configuring multiple providers](#configuring-multiple-providers)
+- [HTTP Provider setup](#http-provider-setup)
 - [Rancher setup](#rancher-setup)
 - [Configuration](#configuration)
 
@@ -47,6 +48,10 @@ Environment variables are meant to be environment variables. But if a provider
 must be instantiated multiple times ( for instance for domains registered on
 different accounts ), these environment variables can be defined in the config
 file. See [example](config/config-example.yml).
+
+## HTTP Provider setup
+
+ACME tokens will be written in `/media/acme-challenge/.well-known/acme-challenge/`.
 
 ## Rancher setup
 
@@ -104,3 +109,5 @@ type globalConfig struct {
 ```
 
 Each missing key in `certConfig` is then populated by values from `defaultConfig`.
+
+<!-- vim: et -->

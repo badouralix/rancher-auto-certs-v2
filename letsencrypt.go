@@ -11,6 +11,7 @@ import (
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/log"
 	"github.com/go-acme/lego/v4/providers/dns"
+	"github.com/go-acme/lego/v4/providers/http/webroot"
 	"github.com/go-acme/lego/v4/registration"
 )
 
@@ -145,6 +146,18 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 
 		// Register provider
 		err = client.Challenge.SetDNS01Provider(provider)
+		if err != nil {
+			return nil, err
+		}
+	case "http-01":
+		// Build provider with some hardcoded parameters
+		provider, err := webroot.NewHTTPProvider("/media/acme-challenge")
+		if err != nil {
+			return nil, err
+		}
+
+		// Register provider
+		err = client.Challenge.SetHTTP01Provider(provider)
 		if err != nil {
 			return nil, err
 		}
