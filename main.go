@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	// Setup let's encrypt manager once
-	lm, err := newLEManager()
+	// Setup acme manager once
+	am, err := newACMEManager()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,11 +26,11 @@ func main() {
 	// See https://stackoverflow.com/questions/32705582/how-to-get-time-tick-to-tick-immediately
 	for ; true; <-ticker.C {
 		// TODO: rewrite this to handle errors properly
-		runAll(lm, cm)
+		runAll(am, cm)
 	}
 }
 
-func runAll(lm *letsencryptManager, cm *certificateManager) error {
+func runAll(am *ACMEManager, cm *certificateManager) error {
 	// Load config from file
 	log.Infof("main: Reading config")
 	config, err := loadConfig("config/config.yml")
@@ -53,7 +53,7 @@ func runAll(lm *letsencryptManager, cm *certificateManager) error {
 		cc := mergeDefaultConfig(c, config.Default)
 
 		// Cannot run this in a goroutine as cm.cache is not thread-safe
-		runCert(lm, cm, cc)
+		runCert(am, cm, cc)
 	}
 
 	// Clear rancher cache
@@ -64,7 +64,7 @@ func runAll(lm *letsencryptManager, cm *certificateManager) error {
 	return nil
 }
 
-func runCert(lm *letsencryptManager, cm *certificateManager, cc certConfig) {
+func runCert(am *ACMEManager, cm *certificateManager, cc certConfig) {
 	// Look for certificates that do not exist yet or that will expire in less than 30 days
 	if _, ok := cm.cache[cc.Name]; ok {
 		t, err := time.Parse("Mon Jan 02 15:04:05 MST 2006", cm.cache[cc.Name].ExpiresAt)
@@ -82,7 +82,7 @@ func runCert(lm *letsencryptManager, cm *certificateManager, cc certConfig) {
 	}
 
 	// Request new certificate
-	legoCertificate, err := lm.GenCertificate(&cc)
+	legoCertificate, err := am.GenCertificate(&cc)
 	if err != nil {
 		log.Warnf("%s", err)
 		return

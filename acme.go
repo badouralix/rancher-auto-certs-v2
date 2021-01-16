@@ -15,37 +15,43 @@ import (
 	"github.com/go-acme/lego/v4/registration"
 )
 
-// We need a user or account type that implements registration.User
-type letsencryptUser struct {
+// ACMEUser a user or account type that implements registration.User
+type ACMEUser struct {
 	Email        string
 	Registration *registration.Resource
 	key          crypto.PrivateKey
 }
 
-func (u *letsencryptUser) GetEmail() string {
+// GetEmail returns the email address of the acme user
+func (u *ACMEUser) GetEmail() string {
 	return u.Email
 }
-func (u letsencryptUser) GetRegistration() *registration.Resource {
+
+// GetRegistration returns the registration resource of the acme user
+func (u *ACMEUser) GetRegistration() *registration.Resource {
 	return u.Registration
 }
-func (u *letsencryptUser) GetPrivateKey() crypto.PrivateKey {
+
+// GetPrivateKey returns the private key of the acme user
+func (u *ACMEUser) GetPrivateKey() crypto.PrivateKey {
 	return u.key
 }
 
-// We use a manager to cache letsencrypt clients and their users
-type letsencryptManager struct {
+// ACMEManager is a cache for acme clients and their users
+type ACMEManager struct {
 	clients     map[string]*lego.Client
 	environment sync.Mutex
 }
 
-func newLEManager() (*letsencryptManager, error) {
-	return &letsencryptManager{
+func newACMEManager() (*ACMEManager, error) {
+	return &ACMEManager{
 		clients: make(map[string]*lego.Client),
 	}, nil
 }
 
-func (lm *letsencryptManager) GenCertificate(cc *certConfig) (*certificate.Resource, error) {
-	client, err := lm.GetClient(cc)
+// GenCertificate generates one certificate for a given config
+func (am *ACMEManager) GenCertificate(cc *certConfig) (*certificate.Resource, error) {
+	client, err := am.GetClient(cc)
 	if err != nil {
 		return nil, err
 	}
@@ -65,9 +71,11 @@ func (lm *letsencryptManager) GenCertificate(cc *certConfig) (*certificate.Resou
 	return certificates, nil
 }
 
-func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
+// GetClient returns an acme client for a gieven config
+// The client is created if it does not exist yet in the manager cache
+func (am *ACMEManager) GetClient(cc *certConfig) (*lego.Client, error) {
 	// Try to retrieve client from cache
-	if client, ok := lm.clients[cc.Name]; ok {
+	if client, ok := am.clients[cc.Name]; ok {
 		return client, nil
 	}
 
@@ -79,7 +87,7 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 		return nil, err
 	}
 
-	user := letsencryptUser{
+	user := ACMEUser{
 		Email: cc.AccountEmail,
 		key:   privateKey,
 	}
@@ -123,8 +131,8 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 	// Register challenges
 
 	// Lock mutex as we are going to update the environment
-	lm.environment.Lock()
-	defer lm.environment.Unlock()
+	am.environment.Lock()
+	defer am.environment.Unlock()
 
 	// Dispatch supported challenges to dedicated methods
 	switch cc.Challenge {
@@ -168,7 +176,7 @@ func (lm *letsencryptManager) GetClient(cc *certConfig) (*lego.Client, error) {
 
 	// Client is cached
 	log.Infof("letsencrypt: A new client has been created for %s", cc.Name)
-	lm.clients[cc.Name] = client
+	am.clients[cc.Name] = client
 
 	// Client is returned
 	return client, nil
