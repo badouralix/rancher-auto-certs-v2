@@ -16,3 +16,7 @@
 
 # go-acme/lego local folder
 .lego/
+
+# rancher-auto-certs-v2 config files
+config/*
+!config/config-example.yml
