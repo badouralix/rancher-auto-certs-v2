@@ -11,11 +11,11 @@ certs:
 - name: example.com
   description: "This is an example"
   domains:
-    - example.com # First domain used as the CommonName
+  - example.com # First domain used as the CommonName
 - name: "*.example.com"
   domains:
-    - example.com # First domain used as the CommonName
-    - "*.example.com"
+  - example.com # First domain used as the CommonName
+  - "*.example.com"
   challenge: dns-01
   provider: ovh
   env:
