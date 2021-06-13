@@ -1,4 +1,4 @@
-FROM golang:1.15-alpine AS builder
+FROM golang:1.16-alpine AS builder
 # See https://github.com/go-acme/lego/issues/946
 ENV GO111MODULE=on
 RUN apk add --no-cache git
