@@ -1,6 +1,9 @@
 package main
 
 import (
+	"io/ioutil"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-acme/lego/v4/log"
@@ -86,6 +89,24 @@ func runCert(am *ACMEManager, cm *certificateManager, cc certConfig) {
 	if err != nil {
 		log.Warnf("%s", err)
 		return
+	}
+
+	// Dump certificate on disk if needed
+	// The files are writable since we need to override them on renewal
+	if cc.DumpPath != "" {
+		filename := strings.ReplaceAll(cc.Name, "*", "star")
+
+		log.Infof("main: Dumping certificate in %s", filepath.Join(cc.DumpPath, filename+".crt"))
+		err = ioutil.WriteFile(filepath.Join(cc.DumpPath, filename+".crt"), legoCertificate.Certificate, 0600)
+		if err != nil {
+			log.Warnf("%s", err)
+		}
+
+		log.Infof("main: Dumping private key in %s", filepath.Join(cc.DumpPath, filename+".key"))
+		err = ioutil.WriteFile(filepath.Join(cc.DumpPath, filename+".key"), legoCertificate.PrivateKey, 0600)
+		if err != nil {
+			log.Warnf("%s", err)
+		}
 	}
 
 	// Build rancher certificate

@@ -84,6 +84,7 @@ type certConfig struct {
 	CreateKeyIfMissing *bool `yaml:"create_key_if_missing"` // boolean pointer here to differentiate empty value from zero value
 	Description        string
 	Domains            []string
+	DumpPath           string            `yaml:"dump_path,omitempty"`
 	Env                map[string]string `json:",omitempty" yaml:",omitempty"`
 	KeyType            string            `yaml:"key_type"`
 	Name               string
@@ -97,6 +98,7 @@ type defaultConfig struct {
 	Challenge          string
 	CreateKeyIfMissing bool `yaml:"create_key_if_missing"`
 	Description        string
+	DumpPath           string `yaml:"dump_path,omitempty"`
 	KeyType            string `yaml:"key_type"`
 	Provider           string `json:",omitempty" yaml:",omitempty"`
 }
